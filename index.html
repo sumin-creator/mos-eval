@@ -238,6 +238,7 @@
         <div class="button-group">
             <button class="btn-primary" id="nextBtn" disabled>次へ</button>
             <button class="btn-secondary" id="downloadBtn" style="display: none;">結果をダウンロード</button>
+            <button class="btn-secondary" id="resetBtn" style="background: #dc3545; color: white;">進捗をリセット</button>
         </div>
 
         <div class="results-section" id="resultsSection">
@@ -259,28 +260,33 @@
 
     <script>
         // 音声ファイルのリスト（ディレクトリ構造に基づく）
+        // Edge対応のため、MP3とWAVの両方をサポート
+        const USE_MP3 = true; // Edge対応: true=MP3, false=WAV
+        const audioExt = USE_MP3 ? 'mp3' : 'wav';
+        
         const audioFiles = [
-            { dir: '0105', files: ['A.wav', 'B.wav', 'C.wav', 'D.wav', 'E.wav'] },
-            { dir: '0107', files: ['A.wav', 'B.wav', 'C.wav', 'D.wav', 'E.wav'] },
-            { dir: '0111', files: ['A.wav', 'B.wav', 'C.wav', 'D.wav', 'E.wav'] },
-            { dir: '0301', files: ['A.wav', 'B.wav', 'C.wav', 'D.wav', 'E.wav'] },
-            { dir: '0303', files: ['A.wav', 'B.wav', 'C.wav', 'D.wav', 'E.wav'] },
-            { dir: '0305', files: ['A.wav', 'B.wav', 'C.wav', 'D.wav', 'E.wav'] },
-            { dir: '0306', files: ['A.wav', 'B.wav', 'C.wav', 'D.wav', 'E.wav'] },
-            { dir: '0307', files: ['A.wav', 'B.wav', 'C.wav', 'D.wav', 'E.wav'] },
-            { dir: '0801', files: ['A.wav', 'B.wav', 'C.wav', 'D.wav', 'E.wav'] },
-            { dir: '0802', files: ['A.wav', 'B.wav', 'C.wav', 'D.wav', 'E.wav'] },
+            { dir: '0105', files: ['A', 'B', 'C', 'D', 'E'] },
+            { dir: '0107', files: ['A', 'B', 'C', 'D', 'E'] },
+            { dir: '0111', files: ['A', 'B', 'C', 'D', 'E'] },
+            { dir: '0301', files: ['A', 'B', 'C', 'D', 'E'] },
+            { dir: '0303', files: ['A', 'B', 'C', 'D', 'E'] },
+            { dir: '0305', files: ['A', 'B', 'C', 'D', 'E'] },
+            { dir: '0306', files: ['A', 'B', 'C', 'D', 'E'] },
+            { dir: '0307', files: ['A', 'B', 'C', 'D', 'E'] },
+            { dir: '0801', files: ['A', 'B', 'C', 'D', 'E'] },
+            { dir: '0802', files: ['A', 'B', 'C', 'D', 'E'] },
         ];
 
         // 全音声をフラットなリストに展開
         let allAudios = [];
         audioFiles.forEach(({ dir, files }) => {
             files.forEach(file => {
+                const fileName = `${file}.${audioExt}`;
                 allAudios.push({
-                    path: `zeval/${dir}/${file}`,  // GitHub Pages用のパス
+                    path: `zeval/${dir}/${fileName}`,  // GitHub Pages用のパス
                     dir: dir,
-                    file: file,
-                    label: `${dir} - ${file.replace('.wav', '')}`
+                    file: fileName,
+                    label: `${dir} - ${file}`
                 });
             });
         });
@@ -305,6 +311,15 @@
             const saved = localStorage.getItem('mosEvalProgress');
             if (saved) {
                 const data = JSON.parse(saved);
+                // 古い形式のパスを修正（zeval/プレフィックスがない場合）
+                if (data.audios && data.audios.length > 0) {
+                    data.audios = data.audios.map(audio => {
+                        if (!audio.path.startsWith('zeval/')) {
+                            audio.path = `zeval/${audio.path}`;
+                        }
+                        return audio;
+                    });
+                }
                 shuffledAudios = data.audios;
                 currentIndex = data.index;
                 results = data.results || [];
@@ -371,9 +386,21 @@
             }
 
             // パスを設定して明示的にロード
-            const fullPath = audio.path;
-            console.log('音声を読み込み中:', fullPath);
-            audioPlayer.src = fullPath;
+            // パスが正しい形式か確認（zeval/プレフィックスがあるか）
+            let fullPath = audio.path;
+            if (!fullPath.startsWith('zeval/')) {
+                fullPath = `zeval/${fullPath}`;
+                console.warn('パスを修正:', audio.path, '→', fullPath);
+                // 修正したパスを保存
+                audio.path = fullPath;
+            }
+            
+            // Edge対応: MIMEタイプを明示的に指定
+            const mimeType = audioExt === 'mp3' ? 'audio/mpeg' : 'audio/wav';
+            console.log('音声を読み込み中:', fullPath, 'MIME:', mimeType, '完全URL:', window.location.origin + '/' + fullPath);
+            
+            // source要素を使ってMIMEタイプを明示
+            audioPlayer.innerHTML = `<source src="${fullPath}" type="${mimeType}">`;
             audioPlayer.load();  // 明示的にロード
             audioLabel.textContent = `音声を読み込み中: ${audio.label}`;
             currentSample.textContent = `サンプル ${currentIndex + 1} / ${shuffledAudios.length}`;
@@ -432,6 +459,15 @@
             // 結果をローカルストレージに保存
             localStorage.setItem('mosEvalResults', JSON.stringify(results));
         }
+
+        // 進捗リセット
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            if (confirm('進捗をリセットしますか？評価結果も削除されます。')) {
+                localStorage.removeItem('mosEvalProgress');
+                localStorage.removeItem('mosEvalResults');
+                location.reload();
+            }
+        });
 
         // CSVダウンロード
         document.getElementById('downloadBtn').addEventListener('click', () => {
