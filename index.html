@@ -475,6 +475,9 @@
 
         <div class="results-section" id="resultsSection">
             <h2>評価完了！ご協力ありがとうございました。</h2>
+            <div class="button-group" style="margin-top: 30px;">
+                <button class="btn-primary" id="backToStartBtn">最初に戻る</button>
+            </div>
         </div>
 
         <div class="info-box">
@@ -933,6 +936,7 @@
             document.getElementById('nextBtn').style.display = 'none';
             document.getElementById('resetBtn').style.display = 'none'; // 評価完了時はリセットボタンを非表示
             document.getElementById('resultsSection').classList.add('show');
+            document.getElementById('backToStartBtn').style.display = 'block'; // 最初に戻るボタンを表示
 
             // ローカルストレージに保存（JSON形式）
             localStorage.setItem('mosEvalResults', JSON.stringify(results));
@@ -1000,6 +1004,20 @@
             }
         });
 
+        // 最初に戻るボタン
+        document.getElementById('backToStartBtn').addEventListener('click', () => {
+            // 全てのデータを削除して最初から開始
+            localStorage.removeItem('mosEvalProgress');
+            localStorage.removeItem('mosEvalResults');
+            localStorage.removeItem('mosShuffledSongs');
+            localStorage.removeItem('mosEvaluatorId');
+            localStorage.removeItem('mosEvaluationSubmitted');
+            localStorage.removeItem('mosUserInfo');
+            location.reload();
+        });
+
+        // 最初に戻るボタンを初期状態で非表示
+        document.getElementById('backToStartBtn').style.display = 'none';
 
         // 初期化：基本情報が入力済みかチェック
         const savedUserInfo = getUserInfo();
