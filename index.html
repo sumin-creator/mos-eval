@@ -216,7 +216,7 @@
 
         <div class="audio-section" id="audioSection">
             <div class="audio-label" id="audioLabel">音声を読み込み中...</div>
-            <audio id="audioPlayer" controls></audio>
+            <audio id="audioPlayer" controls preload="auto"></audio>
         </div>
 
         <div class="rating-section">
@@ -250,7 +250,10 @@
             1. 音声を再生して聴いてください<br>
             2. 1（悪い）から5（優秀）のスコアを選択してください<br>
             3. 「次へ」ボタンで次の音声に進みます<br>
-            4. 全ての評価が終わったら結果をダウンロードしてください
+            4. 全ての評価が終わったら結果をダウンロードしてください<br>
+            <br>
+            <strong>🔧 トラブルシューティング:</strong><br>
+            音声が再生されない場合、ブラウザの開発者ツール（F12）のコンソールを確認してください。
         </div>
     </div>
 
@@ -274,7 +277,7 @@
         audioFiles.forEach(({ dir, files }) => {
             files.forEach(file => {
                 allAudios.push({
-                    path: `zeval/${dir}/${file}`,  // zeval/ を追加
+                    path: `zeval/${dir}/${file}`,  // GitHub Pages用のパス
                     dir: dir,
                     file: file,
                     label: `${dir} - ${file.replace('.wav', '')}`
@@ -337,7 +340,19 @@
             const audioLabel = document.getElementById('audioLabel');
             const currentSample = document.getElementById('currentSample');
 
+            // エラーハンドリングを追加
+            audioPlayer.onerror = function() {
+                console.error('音声読み込みエラー:', audio.path);
+                audioLabel.textContent = `❌ エラー: ${audio.label} (${audio.path})`;
+            };
+
+            audioPlayer.onloadeddata = function() {
+                console.log('音声読み込み成功:', audio.path);
+            };
+
+            // パスを設定して明示的にロード
             audioPlayer.src = audio.path;
+            audioPlayer.load();  // 明示的にロード
             audioLabel.textContent = `音声: ${audio.label}`;
             currentSample.textContent = `サンプル ${currentIndex + 1} / ${shuffledAudios.length}`;
 
