@@ -474,10 +474,7 @@
         </div>
 
         <div class="results-section" id="resultsSection">
-            <h2>評価完了！</h2>
-            <p id="saveStatus">評価結果を保存中...</p>
-            <p>✅ 評価結果は自動的にデータベースに保存されました。</p>
-            <p id="evaluatorIdDisplay"></p>
+            <h2>評価完了！ご協力ありがとうございました。</h2>
         </div>
 
         <div class="info-box">
@@ -881,16 +878,8 @@
         // 全評価完了時にFirebaseに保存
         async function saveToFirebase() {
             const evaluatorId = getEvaluatorId();
-            const evaluatorIdDisplay = document.getElementById('evaluatorIdDisplay');
-            if (evaluatorIdDisplay) {
-                evaluatorIdDisplay.textContent = `🆔 被験者ID: ${evaluatorId}`;
-            }
             
             if (!db) {
-                const saveStatus = document.getElementById('saveStatus');
-                if (saveStatus) {
-                    saveStatus.textContent = '⚠️ Firebaseが設定されていません。ローカルストレージのみに保存しました。';
-                }
                 console.log('Firebaseが設定されていません。ローカルストレージのみに保存します。');
                 return;
             }
@@ -898,10 +887,6 @@
             // 重複チェック（ローカルストレージベース）
             const alreadySubmitted = hasAlreadySubmittedLocal(evaluatorId);
             if (alreadySubmitted) {
-                const saveStatus = document.getElementById('saveStatus');
-                if (saveStatus) {
-                    saveStatus.textContent = '⚠️ このブラウザでは既に評価が送信されています。重複送信は防止されました。';
-                }
                 alert('このブラウザでは既に評価が送信されています。\n重複送信は防止されました。');
                 console.warn('重複送信を防止:', evaluatorId);
                 return;
@@ -918,11 +903,12 @@
                 const userInfo = getUserInfo();
                 
                 const evaluationData = {
+                    // 基本情報を最初に配置（名前を一番上に）
+                    userName: userInfo.userName,
                     evaluatorId: evaluatorId,
                     results: simplifiedResults,
                     completed: true,
-                    // 基本情報を追加
-                    userName: userInfo.userName,
+                    // その他の基本情報
                     ageGroup: userInfo.ageGroup,
                     gender: userInfo.gender,
                     device: userInfo.device,
@@ -935,16 +921,8 @@
                 // 送信済みフラグを設定（重複送信防止）
                 localStorage.setItem('mosEvaluationSubmitted', 'true');
                 
-                const saveStatus = document.getElementById('saveStatus');
-                if (saveStatus) {
-                    saveStatus.textContent = '✅ 評価結果をデータベースに保存しました。';
-                }
                 console.log('✅ Firebaseに保存成功:', evaluatorId);
             } catch (error) {
-                const saveStatus = document.getElementById('saveStatus');
-                if (saveStatus) {
-                    saveStatus.textContent = '❌ データベース保存エラー: ' + error.message;
-                }
                 console.error('❌ Firebase保存エラー:', error);
             }
         }
