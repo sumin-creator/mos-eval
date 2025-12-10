@@ -414,11 +414,18 @@
             
             // Edge対応: srcを直接設定（innerHTMLではなく）
             const mimeType = audioExt === 'mp3' ? 'audio/mpeg' : 'audio/wav';
-            console.log('音声を読み込み中:', fullPath, 'MIME:', mimeType, '完全URL:', window.location.origin + '/' + fullPath);
+            
+            // キャッシュバスターを追加（GitHub PagesのCDNキャッシュを回避）
+            // Date.now()で毎回異なるURLを生成し、ブラウザに「新しいファイル」と認識させる
+            const NO_CACHE = `?v=${Date.now()}`;
+            const urlWithCacheBuster = fullPath + NO_CACHE;
+            
+            console.log('音声を読み込み中:', fullPath, 'MIME:', mimeType);
+            console.log('完全URL（キャッシュバスター付き）:', window.location.origin + '/' + urlWithCacheBuster);
             
             // Edge対応: srcを直接設定してからload()
             // innerHTMLを使うとEdgeが認識しない場合がある
-            audioPlayer.src = fullPath;
+            audioPlayer.src = urlWithCacheBuster;
             
             // ユーザー操作後にload()を呼ぶ（Edge対応）
             // 少し遅延を入れて確実にユーザー操作として認識させる
