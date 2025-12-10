@@ -468,10 +468,11 @@
             <div class="audio-grid" id="audioGrid"></div>
         </div>
 
-        <div class="button-group">
-            <button class="btn-primary" id="nextBtn" disabled>次へ</button>
-            <button class="btn-secondary" id="resetBtn" style="background: #dc3545; color: white;">進捗をリセット</button>
-        </div>
+            <div class="button-group">
+                <button class="btn-secondary" id="prevBtn" style="display: none;">前へ</button>
+                <button class="btn-primary" id="nextBtn" disabled>次へ</button>
+                <button class="btn-secondary" id="resetBtn" style="background: #dc3545; color: white;">進捗をリセット</button>
+            </div>
 
         <div class="results-section" id="resultsSection">
             <h2>評価完了！ご協力ありがとうございました。</h2>
@@ -483,7 +484,7 @@
         <div class="info-box">
             <strong>📋 評価方法:</strong><br>
             1. 各音声（A～E）を再生して聴いてください<br>
-            2. 各音声について、以下の2つの質問に答えてください：<br>
+            2. 各音声について、歌声としての自然さを評価してください：<br>
             <br>
             <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
                 <thead>
@@ -498,15 +499,7 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td style="padding: 10px; border: 1px solid #ddd;"><strong>質問1: 音質（技術的な品質）</strong><br>ノイズ、音割れの有無、明瞭さ</td>
-                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">非常に悪い</td>
-                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">悪い</td>
-                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">普通</td>
-                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">良い</td>
-                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">非常に良い</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 10px; border: 1px solid #ddd;"><strong>質問2: 歌声としての自然さ（表現の品質）</strong><br>歌声の表現がどのくらい自然で人間らしいか</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;"><strong>歌声としての自然さ（表現の品質）</strong><br>歌声の表現がどのくらい自然で人間らしいか</td>
                         <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">非常に不自然</td>
                         <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">不自然</td>
                         <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">普通</td>
@@ -516,8 +509,8 @@
                 </tbody>
             </table>
             <br>
-            3. 全ての音声の両方の質問に回答したら「次へ」ボタンで次の曲に進みます<br>
-            4. 10曲全ての評価が終わったら完了です<br>
+            3. 全ての音声に回答したら「次へ」ボタンで次の曲に進みます<br>
+            4. 8曲全ての評価が終わったら完了です<br>
             <br>
             <strong>📝 注意:</strong><br>
             音声の配置順序（A～E）は各曲ごとにランダムに変更されています。
@@ -635,10 +628,8 @@
         }
         
         const audioFiles = [
-            { dir: '0303', files: ['A', 'B', 'C', 'D', 'E'] },
             { dir: '0305', files: ['A', 'B', 'C', 'D', 'E'] },
             { dir: '0306', files: ['A', 'B', 'C', 'D', 'E'] },
-            { dir: '0307', files: ['A', 'B', 'C', 'D', 'E'] },
             { dir: '0301', files: ['A', 'B', 'C', 'D', 'E'] },
             { dir: '0801', files: ['A', 'B', 'C', 'D', 'E'] },
             { dir: '0802', files: ['A', 'B', 'C', 'D', 'E'] },
@@ -734,7 +725,22 @@
             
             // グリッドをクリア
             audioGrid.innerHTML = '';
-            currentRatings = {};
+            
+            // 既存の評価結果を復元（前へボタンで戻った場合など）
+            const existingResult = results[currentSongIndex];
+            if (existingResult && existingResult.ratings) {
+                currentRatings = {};
+                ['A', 'B', 'C', 'D', 'E'].forEach((label) => {
+                    const rating = existingResult.ratings[label];
+                    if (rating) {
+                        currentRatings[label] = {
+                            naturalness: rating.naturalness
+                        };
+                    }
+                });
+            } else {
+                currentRatings = {};
+            }
 
             // A～Eの順で表示（実際のファイルはランダム順）
             const displayLabels = ['A', 'B', 'C', 'D', 'E'];
@@ -759,48 +765,13 @@
                 audio.id = `audio-${label}`;
                 audioItem.appendChild(audio);
 
-                // 質問1: 音質（技術的な品質）
-                const qualitySection = document.createElement('div');
-                qualitySection.className = 'rating-section';
-
-                const qualityLabel = document.createElement('div');
-                qualityLabel.className = 'rating-label-small';
-                qualityLabel.innerHTML = '<strong>質問1: 音質</strong>';
-                qualitySection.appendChild(qualityLabel);
-
-                const qualityButtons = document.createElement('div');
-                qualityButtons.className = 'rating-buttons';
-
-                for (let i = 1; i <= 5; i++) {
-                    const btn = document.createElement('button');
-                    btn.className = 'rating-btn';
-                    btn.textContent = i;
-                    btn.dataset.rating = i;
-                    btn.dataset.label = label;
-                    btn.dataset.type = 'quality';
-                    btn.addEventListener('click', () => {
-                        // 同じタイプの他のボタンの選択を解除
-                        qualityButtons.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
-                        btn.classList.add('selected');
-                        if (!currentRatings[label]) {
-                            currentRatings[label] = {};
-                        }
-                        currentRatings[label].quality = i;
-                        checkAllRated();
-                    });
-                    qualityButtons.appendChild(btn);
-                }
-
-                qualitySection.appendChild(qualityButtons);
-                audioItem.appendChild(qualitySection);
-
-                // 質問2: 歌声としての自然さ（表現の品質）
+                // 歌声としての自然さ（表現の品質）
                 const naturalnessSection = document.createElement('div');
                 naturalnessSection.className = 'rating-section';
 
                 const naturalnessLabel = document.createElement('div');
                 naturalnessLabel.className = 'rating-label-small';
-                naturalnessLabel.innerHTML = '<strong>質問2: 歌声としての自然さ</strong>';
+                naturalnessLabel.innerHTML = '<strong>歌声としての自然さ</strong>';
                 naturalnessSection.appendChild(naturalnessLabel);
 
                 const naturalnessButtons = document.createElement('div');
@@ -827,19 +798,42 @@
                 }
 
                 naturalnessSection.appendChild(naturalnessButtons);
+                
+                // 既存の評価結果を復元（ボタンの選択状態を設定）
+                if (currentRatings[label] && currentRatings[label].naturalness !== undefined) {
+                    const selectedRating = currentRatings[label].naturalness;
+                    const selectedBtn = naturalnessButtons.querySelector(`[data-rating="${selectedRating}"]`);
+                    if (selectedBtn) {
+                        selectedBtn.classList.add('selected');
+                    }
+                }
+                
                 audioItem.appendChild(naturalnessSection);
                 audioGrid.appendChild(audioItem);
             });
 
             updateProgress();
             checkAllRated();
+            
+            // 前へボタンの表示/非表示を制御
+            const prevBtn = document.getElementById('prevBtn');
+            if (currentSongIndex === 0) {
+                prevBtn.style.display = 'none'; // 最初のページでは非表示
+            } else {
+                prevBtn.style.display = 'inline-block'; // 2ページ目以降は表示
+            }
+            
+            // 最後のページでは前へボタンを非表示
+            if (currentSongIndex >= shuffledSongs.length - 1) {
+                prevBtn.style.display = 'none';
+            }
         }
 
-        // 全て評価済みかチェック（音質と自然さの両方が必要）
+        // 全て評価済みかチェック（自然さのみ必要）
         function checkAllRated() {
             const allRated = ['A', 'B', 'C', 'D', 'E'].every(label => {
                 const rating = currentRatings[label];
-                return rating && rating.quality !== undefined && rating.naturalness !== undefined;
+                return rating && rating.naturalness !== undefined;
             });
             document.getElementById('nextBtn').disabled = !allRated;
         }
@@ -934,6 +928,7 @@
         async function showResults() {
             document.getElementById('evaluationSection').style.display = 'none';
             document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('prevBtn').style.display = 'none'; // 評価完了時は前へボタンも非表示
             document.getElementById('resetBtn').style.display = 'none'; // 評価完了時はリセットボタンを非表示
             document.getElementById('resultsSection').classList.add('show');
             document.getElementById('backToStartBtn').style.display = 'block'; // 最初に戻るボタンを表示
@@ -950,6 +945,19 @@
             }
         }
 
+        // 前へボタン
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentSongIndex > 0) {
+                // 現在の評価結果を削除（前のページに戻るため）
+                if (results.length > 0) {
+                    results.pop();
+                }
+                currentSongIndex--;
+                saveProgress();
+                loadSong();
+            }
+        });
+
         // 次へボタン
         document.getElementById('nextBtn').addEventListener('click', () => {
             const song = shuffledSongs[currentSongIndex];
@@ -965,7 +973,6 @@
                 const rating = currentRatings[label];
                 songResult.ratings[label] = {
                     actualFile: actualFile,
-                    quality: rating.quality,
                     naturalness: rating.naturalness
                 };
             });
