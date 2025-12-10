@@ -498,13 +498,11 @@
             
             try {
                 const evaluatorId = getEvaluatorId();
+                // 簡略化：dir, actualFile, ratingのみ保存
                 const songData = {
                     evaluatorId: evaluatorId,
                     songNumber: currentSongIndex + 1,
                     dir: songResult.dir,
-                    timestamp: songResult.timestamp,
-                    originalOrder: songResult.originalOrder,
-                    shuffledOrder: songResult.shuffledOrder,
                     ratings: songResult.ratings
                 };
                 
@@ -558,14 +556,16 @@
             }
             
             try {
+                // 簡略化：dir, actualFile, ratingのみを含む結果を作成
+                const simplifiedResults = results.map(songResult => ({
+                    dir: songResult.dir,
+                    ratings: songResult.ratings
+                }));
+                
                 const evaluationData = {
                     evaluatorId: evaluatorId,
-                    timestamp: new Date().toISOString(),
-                    results: results,
-                    completed: true,
-                    userAgent: navigator.userAgent,
-                    screenResolution: `${screen.width}x${screen.height}`,
-                    shuffledSongs: shuffledSongs // シャッフル順序も保存（再現性のため）
+                    results: simplifiedResults,
+                    completed: true
                 };
                 
                 await db.collection('evaluations').add(evaluationData);
@@ -609,12 +609,9 @@
         document.getElementById('nextBtn').addEventListener('click', () => {
             const song = shuffledSongs[currentSongIndex];
             
-            // 結果を保存（ランダム順序も記録）
+            // 結果を保存（簡略化：dir, actualFile, ratingのみ）
             const songResult = {
                 dir: song.dir,
-                timestamp: new Date().toISOString(),
-                originalOrder: song.originalOrder,
-                shuffledOrder: song.files,
                 ratings: {}
             };
 
@@ -659,13 +656,13 @@
             }
         });
 
-        // CSVダウンロード関数
+        // CSVダウンロード関数（簡略化版）
         function downloadCSV() {
-            let csv = '曲番号,ディレクトリ,ラベル,実際のファイル,評価,元の順序,シャッフル順序,タイムスタンプ\n';
+            let csv = '曲番号,ディレクトリ,ラベル,実際のファイル,評価\n';
             results.forEach((songResult, songIdx) => {
                 ['A', 'B', 'C', 'D', 'E'].forEach(label => {
                     const rating = songResult.ratings[label];
-                    csv += `${songIdx + 1},${songResult.dir},${label},${rating.actualFile},${rating.rating},${songResult.originalOrder.join('-')},${songResult.shuffledOrder.join('-')},${songResult.timestamp}\n`;
+                    csv += `${songIdx + 1},${songResult.dir},${label},${rating.actualFile},${rating.rating}\n`;
                 });
             });
 
