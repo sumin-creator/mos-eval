@@ -109,9 +109,15 @@
 
         .rating-label-small {
             text-align: center;
-            font-size: 0.9em;
+            font-size: 0.85em;
             color: #555;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .rating-label-small strong {
+            color: #333;
+            font-size: 0.95em;
         }
 
         .rating-buttons {
@@ -464,7 +470,6 @@
 
         <div class="button-group">
             <button class="btn-primary" id="nextBtn" disabled>次へ</button>
-            <button class="btn-secondary" id="downloadBtn" style="display: none;">結果をダウンロード</button>
             <button class="btn-secondary" id="resetBtn" style="background: #dc3545; color: white;">進捗をリセット</button>
         </div>
 
@@ -472,17 +477,17 @@
             <h2>評価完了！</h2>
             <p id="saveStatus">評価結果を保存中...</p>
             <p>✅ 評価結果は自動的にデータベースに保存されました。</p>
-            <p>✅ CSVファイルも自動的にダウンロードフォルダに保存されました（バックアップ用）。</p>
-            <p>📁 ファイル名: <code>mos_results_YYYY-MM-DD.csv</code></p>
             <p id="evaluatorIdDisplay"></p>
         </div>
 
         <div class="info-box">
             <strong>📋 評価方法:</strong><br>
             1. 各音声（A～E）を再生して聴いてください<br>
-            2. 各音声の「歌声の自然さ」を1（不自然）～5（自然）で評価してください<br>
-            3. 全ての音声を評価したら「次へ」ボタンで次の曲に進みます<br>
-            4. 10曲全ての評価が終わったら結果をダウンロードしてください<br>
+            2. 各音声について、以下の2つの質問に答えてください：<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<strong>質問1: 音質（技術的な品質）</strong> - ノイズ、音割れの有無、明瞭さを1（非常に悪い）～5（非常に良い）で評価<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<strong>質問2: 歌声としての自然さ（表現の品質）</strong> - 歌声の表現がどのくらい自然で人間らしいかを1（非常に不自然）～5（非常に自然）で評価<br>
+            3. 全ての音声の両方の質問に回答したら「次へ」ボタンで次の曲に進みます<br>
+            4. 10曲全ての評価が終わったら完了です<br>
             <br>
             <strong>📝 注意:</strong><br>
             音声の配置順序（A～E）は各曲ごとにランダムに変更されています。
@@ -616,7 +621,7 @@
         let shuffledSongs = [];
         let currentSongIndex = 0;
         let results = [];
-        let currentRatings = {}; // 現在の曲の評価 {A: 3, B: 5, ...}
+        let currentRatings = {}; // 現在の曲の評価 {A: {quality: 3, naturalness: 5}, B: {quality: 2, naturalness: 4}, ...}
 
         // ランダムにシャッフル
         function shuffleArray(array) {
@@ -724,16 +729,17 @@
                 audio.id = `audio-${label}`;
                 audioItem.appendChild(audio);
 
-                const ratingSection = document.createElement('div');
-                ratingSection.className = 'rating-section';
+                // 質問1: 音質（技術的な品質）
+                const qualitySection = document.createElement('div');
+                qualitySection.className = 'rating-section';
 
-                const ratingLabel = document.createElement('div');
-                ratingLabel.className = 'rating-label-small';
-                ratingLabel.textContent = '歌声の自然さ';
-                ratingSection.appendChild(ratingLabel);
+                const qualityLabel = document.createElement('div');
+                qualityLabel.className = 'rating-label-small';
+                qualityLabel.innerHTML = '<strong>質問1: 音質（技術的な品質）</strong><br>ノイズ、音割れの有無、明瞭さ';
+                qualitySection.appendChild(qualityLabel);
 
-                const ratingButtons = document.createElement('div');
-                ratingButtons.className = 'rating-buttons';
+                const qualityButtons = document.createElement('div');
+                qualityButtons.className = 'rating-buttons';
 
                 for (let i = 1; i <= 5; i++) {
                     const btn = document.createElement('button');
@@ -741,18 +747,57 @@
                     btn.textContent = i;
                     btn.dataset.rating = i;
                     btn.dataset.label = label;
+                    btn.dataset.type = 'quality';
                     btn.addEventListener('click', () => {
-                        // 同じアイテム内の他のボタンの選択を解除
-                        ratingButtons.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
+                        // 同じタイプの他のボタンの選択を解除
+                        qualityButtons.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
                         btn.classList.add('selected');
-                        currentRatings[label] = i;
+                        if (!currentRatings[label]) {
+                            currentRatings[label] = {};
+                        }
+                        currentRatings[label].quality = i;
                         checkAllRated();
                     });
-                    ratingButtons.appendChild(btn);
+                    qualityButtons.appendChild(btn);
                 }
 
-                ratingSection.appendChild(ratingButtons);
-                audioItem.appendChild(ratingSection);
+                qualitySection.appendChild(qualityButtons);
+                audioItem.appendChild(qualitySection);
+
+                // 質問2: 歌声としての自然さ（表現の品質）
+                const naturalnessSection = document.createElement('div');
+                naturalnessSection.className = 'rating-section';
+
+                const naturalnessLabel = document.createElement('div');
+                naturalnessLabel.className = 'rating-label-small';
+                naturalnessLabel.innerHTML = '<strong>質問2: 歌声としての自然さ（表現の品質）</strong><br>歌声の表現がどのくらい自然で人間らしいか';
+                naturalnessSection.appendChild(naturalnessLabel);
+
+                const naturalnessButtons = document.createElement('div');
+                naturalnessButtons.className = 'rating-buttons';
+
+                for (let i = 1; i <= 5; i++) {
+                    const btn = document.createElement('button');
+                    btn.className = 'rating-btn';
+                    btn.textContent = i;
+                    btn.dataset.rating = i;
+                    btn.dataset.label = label;
+                    btn.dataset.type = 'naturalness';
+                    btn.addEventListener('click', () => {
+                        // 同じタイプの他のボタンの選択を解除
+                        naturalnessButtons.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
+                        btn.classList.add('selected');
+                        if (!currentRatings[label]) {
+                            currentRatings[label] = {};
+                        }
+                        currentRatings[label].naturalness = i;
+                        checkAllRated();
+                    });
+                    naturalnessButtons.appendChild(btn);
+                }
+
+                naturalnessSection.appendChild(naturalnessButtons);
+                audioItem.appendChild(naturalnessSection);
                 audioGrid.appendChild(audioItem);
             });
 
@@ -760,9 +805,12 @@
             checkAllRated();
         }
 
-        // 全て評価済みかチェック
+        // 全て評価済みかチェック（音質と自然さの両方が必要）
         function checkAllRated() {
-            const allRated = ['A', 'B', 'C', 'D', 'E'].every(label => currentRatings[label] !== undefined);
+            const allRated = ['A', 'B', 'C', 'D', 'E'].every(label => {
+                const rating = currentRatings[label];
+                return rating && rating.quality !== undefined && rating.naturalness !== undefined;
+            });
             document.getElementById('nextBtn').disabled = !allRated;
         }
 
@@ -876,7 +924,6 @@
             document.getElementById('evaluationSection').style.display = 'none';
             document.getElementById('nextBtn').style.display = 'none';
             document.getElementById('resultsSection').classList.add('show');
-            document.getElementById('downloadBtn').style.display = 'block';
 
             // ローカルストレージに保存（JSON形式）
             localStorage.setItem('mosEvalResults', JSON.stringify(results));
@@ -884,16 +931,13 @@
             
             // Firebaseに保存
             await saveToFirebase();
-            
-            // 自動的にCSVをダウンロード（バックアップ用）
-            downloadCSV();
         }
 
         // 次へボタン
         document.getElementById('nextBtn').addEventListener('click', () => {
             const song = shuffledSongs[currentSongIndex];
             
-            // 結果を保存（簡略化：dir, actualFile, ratingのみ）
+            // 結果を保存（簡略化：dir, actualFile, quality, naturalness）
             const songResult = {
                 dir: song.dir,
                 ratings: {}
@@ -901,9 +945,11 @@
 
             ['A', 'B', 'C', 'D', 'E'].forEach((label, idx) => {
                 const actualFile = song.files[idx];
+                const rating = currentRatings[label];
                 songResult.ratings[label] = {
                     actualFile: actualFile,
-                    rating: currentRatings[label]
+                    quality: rating.quality,
+                    naturalness: rating.naturalness
                 };
             });
 
@@ -941,35 +987,6 @@
             }
         });
 
-        // CSVダウンロード関数（簡略化版）
-        function downloadCSV() {
-            let csv = '曲番号,ディレクトリ,ラベル,実際のファイル,評価\n';
-            results.forEach((songResult, songIdx) => {
-                ['A', 'B', 'C', 'D', 'E'].forEach(label => {
-                    const rating = songResult.ratings[label];
-                    csv += `${songIdx + 1},${songResult.dir},${label},${rating.actualFile},${rating.rating}\n`;
-                });
-            });
-
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
-            link.setAttribute('href', url);
-            link.setAttribute('download', `mos_results_${timestamp}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            // ブラウザのダウンロードフォルダに保存される
-            console.log('CSVファイルをダウンロードしました:', `mos_results_${timestamp}.csv`);
-        }
-
-        // ダウンロードボタン（再ダウンロード用）
-        document.getElementById('downloadBtn').addEventListener('click', () => {
-            downloadCSV();
-        });
 
         // 初期化：基本情報が入力済みかチェック
         const savedUserInfo = getUserInfo();
