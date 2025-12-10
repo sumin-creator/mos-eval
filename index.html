@@ -265,10 +265,29 @@
     </div>
 
     <script>
+        // =============================================================================
+        // 設定
+        // =============================================================================
+        
+        // 開発モード: true=リアルタイム反映（キャッシュ無効化）、false=本番モード（パフォーマンス最適化）
+        const DEV_MODE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        
         // 音声ファイルのリスト（ディレクトリ構造に基づく）
         // Edge対応のため、MP3とWAVの両方をサポート
         const USE_MP3 = true; // Edge対応: true=MP3, false=WAV
         const audioExt = USE_MP3 ? 'mp3' : 'wav';
+        
+        // キャッシュバスター生成関数
+        function getCacheBuster() {
+            if (DEV_MODE) {
+                // 開発モード: 毎回異なるURL（リアルタイム反映）
+                return `?v=${Date.now()}`;
+            } else {
+                // 本番モード: 固定バージョン（パフォーマンス最適化）
+                // ファイルを更新したらこのバージョン番号を変更する
+                return `?v=20250310`;
+            }
+        }
         
         const audioFiles = [
             { dir: '0105', files: ['A', 'B', 'C', 'D', 'E'] },
@@ -415,12 +434,14 @@
             // Edge対応: srcを直接設定（innerHTMLではなく）
             const mimeType = audioExt === 'mp3' ? 'audio/mpeg' : 'audio/wav';
             
-            // キャッシュバスターを追加（GitHub PagesのCDNキャッシュを回避）
-            // Date.now()で毎回異なるURLを生成し、ブラウザに「新しいファイル」と認識させる
-            const NO_CACHE = `?v=${Date.now()}`;
-            const urlWithCacheBuster = fullPath + NO_CACHE;
+            // キャッシュバスターを追加
+            // 開発モード: 毎回異なるURL（リアルタイム反映）
+            // 本番モード: 固定バージョン（パフォーマンス最適化）
+            const cacheBuster = getCacheBuster();
+            const urlWithCacheBuster = fullPath + cacheBuster;
             
             console.log('音声を読み込み中:', fullPath, 'MIME:', mimeType);
+            console.log('モード:', DEV_MODE ? '開発（リアルタイム反映）' : '本番（キャッシュ最適化）');
             console.log('完全URL（キャッシュバスター付き）:', window.location.origin + '/' + urlWithCacheBuster);
             
             // Edge対応: srcを直接設定してからload()
