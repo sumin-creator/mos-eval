@@ -274,7 +274,7 @@
         audioFiles.forEach(({ dir, files }) => {
             files.forEach(file => {
                 allAudios.push({
-                    path: `${dir}/${file}`,
+                    path: `zeval/${dir}/${file}`,  // zeval/ を追加
                     dir: dir,
                     file: file,
                     label: `${dir} - ${file.replace('.wav', '')}`

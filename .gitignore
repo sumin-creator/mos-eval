@@ -13,7 +13,9 @@ Thumbs.db
 *.log
 
 # 音声ファイルはGitHubのWebインターフェースからは非表示
-# ただし、GitHub Pagesからは index.html 経由でアクセス可能
-zeval/
-*.wav
+# ただし、GitHub Pagesで使用するため、pushは必要です
+# GitHubのWebインターフェースではディレクトリ一覧が自動生成されないため、
+# 直接URLを知らなければ見つけられません
+# zeval/
+# *.wav
 
