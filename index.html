@@ -515,21 +515,17 @@
             }
         }
         
-        // 既に送信済みかチェック
-        async function hasAlreadySubmitted(evaluatorId) {
-            if (!db) return false;
-            
-            try {
-                const snap = await db
-                    .collection('evaluations')
-                    .where('evaluatorId', '==', evaluatorId)
-                    .where('completed', '==', true)
-                    .get();
-                return !snap.empty;
-            } catch (error) {
-                console.error('重複チェックエラー:', error);
-                return false;
+        // 既に送信済みかチェック（ローカルストレージベース）
+        // 注意: Firestoreのセキュリティルールで読み取りが禁止されているため、
+        // サーバー側での重複チェックはできません。
+        // ローカルストレージで重複を防止します。
+        function hasAlreadySubmittedLocal(evaluatorId) {
+            const submittedFlag = localStorage.getItem('mosEvaluationSubmitted');
+            if (submittedFlag === 'true') {
+                console.warn('重複送信を検出（ローカルストレージ）:', evaluatorId);
+                return true;
             }
+            return false;
         }
         
         // 全評価完了時にFirebaseに保存
@@ -549,14 +545,14 @@
                 return;
             }
             
-            // 重複チェック
-            const alreadySubmitted = await hasAlreadySubmitted(evaluatorId);
+            // 重複チェック（ローカルストレージベース）
+            const alreadySubmitted = hasAlreadySubmittedLocal(evaluatorId);
             if (alreadySubmitted) {
                 const saveStatus = document.getElementById('saveStatus');
                 if (saveStatus) {
-                    saveStatus.textContent = '⚠️ この被験者IDでは既に評価が送信されています。重複送信は防止されました。';
+                    saveStatus.textContent = '⚠️ このブラウザでは既に評価が送信されています。重複送信は防止されました。';
                 }
-                alert('この被験者IDでは既に評価が送信されています。\n重複送信は防止されました。');
+                alert('このブラウザでは既に評価が送信されています。\n重複送信は防止されました。');
                 console.warn('重複送信を防止:', evaluatorId);
                 return;
             }
@@ -573,6 +569,10 @@
                 };
                 
                 await db.collection('evaluations').add(evaluationData);
+                
+                // 送信済みフラグを設定（重複送信防止）
+                localStorage.setItem('mosEvaluationSubmitted', 'true');
+                
                 const saveStatus = document.getElementById('saveStatus');
                 if (saveStatus) {
                     saveStatus.textContent = '✅ 評価結果をデータベースに保存しました。';
@@ -654,6 +654,7 @@
                 localStorage.removeItem('mosEvalResults');
                 localStorage.removeItem('mosShuffledSongs'); // シャッフル順序も削除
                 localStorage.removeItem('mosEvaluatorId'); // 被験者IDも削除（新しい被験者として開始）
+                localStorage.removeItem('mosEvaluationSubmitted'); // 送信済みフラグも削除
                 location.reload();
             }
         });
