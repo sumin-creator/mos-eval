@@ -361,7 +361,11 @@
             const audioLabel = document.getElementById('audioLabel');
             const currentSample = document.getElementById('currentSample');
 
-            // エラーハンドリングを追加
+            // エラーハンドリングを追加（イベントリスナーをリセット）
+            audioPlayer.onerror = null;
+            audioPlayer.onloadeddata = null;
+            audioPlayer.oncanplay = null;
+            
             audioPlayer.onerror = function(e) {
                 const errorMsg = audioPlayer.error ? 
                     `Code: ${audioPlayer.error.code} (${getAudioErrorText(audioPlayer.error.code)})` : 
@@ -370,13 +374,20 @@
                     path: audio.path,
                     label: audio.label,
                     error: errorMsg,
-                    fullURL: window.location.origin + '/' + audio.path
+                    fullURL: window.location.origin + '/' + audio.path,
+                    readyState: audioPlayer.readyState
                 });
                 audioLabel.textContent = `❌ エラー: ${audio.label}\nパス: ${audio.path}\n${errorMsg}`;
             };
 
             audioPlayer.onloadeddata = function() {
-                console.log('音声読み込み成功:', audio.path);
+                console.log('音声読み込み成功:', audio.path, 'readyState:', audioPlayer.readyState);
+                audioLabel.textContent = `音声: ${audio.label}`;
+            };
+            
+            // Edge対応: canplayイベントも監視
+            audioPlayer.oncanplay = function() {
+                console.log('音声再生可能:', audio.path);
                 audioLabel.textContent = `音声: ${audio.label}`;
             };
 
@@ -401,13 +412,19 @@
                 audio.path = fullPath;
             }
             
-            // Edge対応: MIMEタイプを明示的に指定
+            // Edge対応: srcを直接設定（innerHTMLではなく）
             const mimeType = audioExt === 'mp3' ? 'audio/mpeg' : 'audio/wav';
             console.log('音声を読み込み中:', fullPath, 'MIME:', mimeType, '完全URL:', window.location.origin + '/' + fullPath);
             
-            // source要素を使ってMIMEタイプを明示
-            audioPlayer.innerHTML = `<source src="${fullPath}" type="${mimeType}">`;
-            audioPlayer.load();  // 明示的にロード
+            // Edge対応: srcを直接設定してからload()
+            // innerHTMLを使うとEdgeが認識しない場合がある
+            audioPlayer.src = fullPath;
+            
+            // ユーザー操作後にload()を呼ぶ（Edge対応）
+            // 少し遅延を入れて確実にユーザー操作として認識させる
+            setTimeout(() => {
+                audioPlayer.load();
+            }, 10);
             audioLabel.textContent = `音声を読み込み中: ${audio.label}`;
             currentSample.textContent = `サンプル ${currentIndex + 1} / ${shuffledAudios.length}`;
 
