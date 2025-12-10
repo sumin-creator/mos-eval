@@ -341,19 +341,41 @@
             const currentSample = document.getElementById('currentSample');
 
             // エラーハンドリングを追加
-            audioPlayer.onerror = function() {
-                console.error('音声読み込みエラー:', audio.path);
-                audioLabel.textContent = `❌ エラー: ${audio.label} (${audio.path})`;
+            audioPlayer.onerror = function(e) {
+                const errorMsg = audioPlayer.error ? 
+                    `Code: ${audioPlayer.error.code} (${getAudioErrorText(audioPlayer.error.code)})` : 
+                    'Unknown error';
+                console.error('音声読み込みエラー:', {
+                    path: audio.path,
+                    label: audio.label,
+                    error: errorMsg,
+                    fullURL: window.location.origin + '/' + audio.path
+                });
+                audioLabel.textContent = `❌ エラー: ${audio.label}\nパス: ${audio.path}\n${errorMsg}`;
             };
 
             audioPlayer.onloadeddata = function() {
                 console.log('音声読み込み成功:', audio.path);
+                audioLabel.textContent = `音声: ${audio.label}`;
             };
 
+            // エラーコードの説明を取得
+            function getAudioErrorText(code) {
+                const errorCodes = {
+                    1: 'MEDIA_ERR_ABORTED - ユーザーが再生を中止',
+                    2: 'MEDIA_ERR_NETWORK - ネットワークエラー',
+                    3: 'MEDIA_ERR_DECODE - デコードエラー',
+                    4: 'MEDIA_ERR_SRC_NOT_SUPPORTED - フォーマット未対応'
+                };
+                return errorCodes[code] || '不明なエラー';
+            }
+
             // パスを設定して明示的にロード
-            audioPlayer.src = audio.path;
+            const fullPath = audio.path;
+            console.log('音声を読み込み中:', fullPath);
+            audioPlayer.src = fullPath;
             audioPlayer.load();  // 明示的にロード
-            audioLabel.textContent = `音声: ${audio.label}`;
+            audioLabel.textContent = `音声を読み込み中: ${audio.label}`;
             currentSample.textContent = `サンプル ${currentIndex + 1} / ${shuffledAudios.length}`;
 
             selectedRating = null;
