@@ -887,8 +887,8 @@
             // 重複チェック（ローカルストレージベース）
             const alreadySubmitted = hasAlreadySubmittedLocal(evaluatorId);
             if (alreadySubmitted) {
-                alert('このブラウザでは既に評価が送信されています。\n重複送信は防止されました。');
-                console.warn('重複送信を防止:', evaluatorId);
+                // 既に送信済みの場合は静かにスキップ（メッセージ表示なし）
+                console.log('既に評価が送信済みです:', evaluatorId);
                 return;
             }
             
@@ -937,8 +937,12 @@
             localStorage.setItem('mosEvalResults', JSON.stringify(results));
             localStorage.setItem('mosEvalResultsTimestamp', new Date().toISOString());
             
-            // Firebaseに保存
-            await saveToFirebase();
+            // Firebaseに保存（既に送信済みの場合はスキップ）
+            const evaluatorId = getEvaluatorId();
+            const alreadySubmitted = hasAlreadySubmittedLocal(evaluatorId);
+            if (!alreadySubmitted) {
+                await saveToFirebase();
+            }
         }
 
         // 次へボタン
