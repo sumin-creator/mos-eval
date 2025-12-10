@@ -208,6 +208,101 @@
             border-radius: 5px;
         }
 
+        /* 基本情報フォーム */
+        .user-info-section {
+            display: block;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .user-info-section.hidden {
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .radio-item input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .radio-item label {
+            cursor: pointer;
+            font-size: 1em;
+            color: #333;
+        }
+
+        .select-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .select-item {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .start-eval-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            margin-top: 30px;
+        }
+
         @media (max-width: 1200px) {
             .audio-grid {
                 grid-template-columns: repeat(3, 1fr);
@@ -228,17 +323,142 @@
     </style>
 </head>
 <body>
-    <div class="container">
+        <div class="container">
         <h1>🎵 MOS評価システム</h1>
         <p class="subtitle">歌声の自然さ評価 - Mean Opinion Score</p>
 
-        <div class="progress-bar">
+        <!-- 基本情報フォーム -->
+        <div class="user-info-section" id="userInfoSection">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #333;">基本情報の入力</h2>
+            
+            <form id="userInfoForm">
+                <div class="form-group">
+                    <label class="form-label">1. お名前（ハンネでも可）</label>
+                    <input type="text" class="form-input" id="userName" placeholder="例: 田中太郎" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">2. 年齢層</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="age10" name="ageGroup" value="10代" required>
+                            <label for="age10">10代</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="age20" name="ageGroup" value="20代" required>
+                            <label for="age20">20代</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="age30" name="ageGroup" value="30代" required>
+                            <label for="age30">30代</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="age40" name="ageGroup" value="40代以上" required>
+                            <label for="age40">40代以上</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">3. 性別</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="genderMale" name="gender" value="男性" required>
+                            <label for="genderMale">男性</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="genderFemale" name="gender" value="女性" required>
+                            <label for="genderFemale">女性</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="genderOther" name="gender" value="回答しない" required>
+                            <label for="genderOther">回答しない</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">4. 使用デバイス</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="deviceHeadphone" name="device" value="ヘッドホン" required>
+                            <label for="deviceHeadphone">(1) ヘッドホン</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="deviceEarbud" name="device" value="イヤホン" required>
+                            <label for="deviceEarbud">(2) イヤホン</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="deviceBuiltin" name="device" value="PC/スマホ内蔵スピーカー" required>
+                            <label for="deviceBuiltin">(3) PC/スマホ内蔵スピーカー</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="deviceExternal" name="device" value="外付けスピーカー" required>
+                            <label for="deviceExternal">(4) 外付けスピーカー</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">5. 周囲の騒音レベル</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="noiseVeryQuiet" name="noiseLevel" value="非常に静か" required>
+                            <label for="noiseVeryQuiet">(1) 非常に静か</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="noiseQuiet" name="noiseLevel" value="やや静か" required>
+                            <label for="noiseQuiet">(2) やや静か</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="noiseNoisy" name="noiseLevel" value="やや騒がしい" required>
+                            <label for="noiseNoisy">(3) やや騒がしい</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="noiseVeryNoisy" name="noiseLevel" value="非常に騒がしい" required>
+                            <label for="noiseVeryNoisy">(4) 非常に騒がしい</label>
+                        </div>
+                    </div>
+                    <p style="color: #666; font-size: 0.9em; margin-top: 8px;">※なるべく静かな環境で評価を行ってください</p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">6. 音楽経験（楽器、作曲経験）</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="musicNone" name="musicExperience" value="なし" required>
+                            <label for="musicNone">なし</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="musicLess1" name="musicExperience" value="1年未満" required>
+                            <label for="musicLess1">1年未満</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="music1to3" name="musicExperience" value="1年以上3年未満" required>
+                            <label for="music1to3">1年以上3年未満</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="music3to5" name="musicExperience" value="3年以上5年未満" required>
+                            <label for="music3to5">3年以上5年未満</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="music5plus" name="musicExperience" value="5年以上" required>
+                            <label for="music5plus">5年以上</label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary start-eval-btn">評価を開始</button>
+            </form>
+        </div>
+
+        <div class="progress-bar" id="progressBar" style="display: none;">
             <div class="progress-fill" id="progressFill">0%</div>
         </div>
 
-        <div class="current-sample" id="currentSample"></div>
+        <div class="current-sample" id="currentSample" style="display: none;"></div>
 
-        <div id="evaluationSection">
+        <div id="evaluationSection" style="display: none;">
             <div class="audio-grid" id="audioGrid"></div>
         </div>
 
@@ -270,6 +490,60 @@
     </div>
 
     <script>
+        // =============================================================================
+        // 基本情報管理
+        // =============================================================================
+        let userInfo = {
+            userName: '',
+            ageGroup: '',
+            gender: '',
+            device: '',
+            noiseLevel: '',
+            musicExperience: ''
+        };
+
+        // 基本情報を取得
+        function getUserInfo() {
+            const saved = localStorage.getItem('mosUserInfo');
+            if (saved) {
+                return JSON.parse(saved);
+            }
+            return userInfo;
+        }
+
+        // 基本情報を保存
+        function saveUserInfo(info) {
+            localStorage.setItem('mosUserInfo', JSON.stringify(info));
+            userInfo = info;
+        }
+
+        // 基本情報フォームの処理
+        document.getElementById('userInfoForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                userName: document.getElementById('userName').value.trim(),
+                ageGroup: document.querySelector('input[name="ageGroup"]:checked').value,
+                gender: document.querySelector('input[name="gender"]:checked').value,
+                device: document.querySelector('input[name="device"]:checked').value,
+                noiseLevel: document.querySelector('input[name="noiseLevel"]:checked').value,
+                musicExperience: document.querySelector('input[name="musicExperience"]:checked').value
+            };
+            
+            // 基本情報を保存
+            saveUserInfo(formData);
+            
+            // フォームを非表示にして評価を開始
+            document.getElementById('userInfoSection').classList.add('hidden');
+            document.getElementById('progressBar').style.display = 'block';
+            document.getElementById('currentSample').style.display = 'block';
+            document.getElementById('evaluationSection').style.display = 'block';
+            
+            // 評価を開始
+            loadProgress();
+            loadSong();
+        });
+
         // =============================================================================
         // Firebase設定
         // =============================================================================
@@ -562,10 +836,20 @@
                     ratings: songResult.ratings
                 }));
                 
+                // 基本情報を取得
+                const userInfo = getUserInfo();
+                
                 const evaluationData = {
                     evaluatorId: evaluatorId,
                     results: simplifiedResults,
-                    completed: true
+                    completed: true,
+                    // 基本情報を追加
+                    userName: userInfo.userName,
+                    ageGroup: userInfo.ageGroup,
+                    gender: userInfo.gender,
+                    device: userInfo.device,
+                    noiseLevel: userInfo.noiseLevel,
+                    musicExperience: userInfo.musicExperience
                 };
                 
                 await db.collection('evaluations').add(evaluationData);
@@ -652,6 +936,7 @@
                 localStorage.removeItem('mosShuffledSongs'); // シャッフル順序も削除
                 localStorage.removeItem('mosEvaluatorId'); // 被験者IDも削除（新しい被験者として開始）
                 localStorage.removeItem('mosEvaluationSubmitted'); // 送信済みフラグも削除
+                localStorage.removeItem('mosUserInfo'); // 基本情報も削除
                 location.reload();
             }
         });
@@ -686,9 +971,20 @@
             downloadCSV();
         });
 
-        // 初期化
-        loadProgress();
-        loadSong();
+        // 初期化：基本情報が入力済みかチェック
+        const savedUserInfo = getUserInfo();
+        if (savedUserInfo.userName && savedUserInfo.ageGroup) {
+            // 基本情報が入力済みの場合は評価を開始
+            document.getElementById('userInfoSection').classList.add('hidden');
+            document.getElementById('progressBar').style.display = 'block';
+            document.getElementById('currentSample').style.display = 'block';
+            document.getElementById('evaluationSection').style.display = 'block';
+            loadProgress();
+            loadSong();
+        } else {
+            // 基本情報が未入力の場合はフォームを表示
+            document.getElementById('userInfoSection').classList.remove('hidden');
+        }
     </script>
 </body>
 </html>
