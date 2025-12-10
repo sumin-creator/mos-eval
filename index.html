@@ -484,8 +484,38 @@
             <strong>📋 評価方法:</strong><br>
             1. 各音声（A～E）を再生して聴いてください<br>
             2. 各音声について、以下の2つの質問に答えてください：<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;<strong>質問1: 音質（技術的な品質）</strong> - ノイズ、音割れの有無、明瞭さを1（非常に悪い）～5（非常に良い）で評価<br>
-            &nbsp;&nbsp;&nbsp;&nbsp;<strong>質問2: 歌声としての自然さ（表現の品質）</strong> - 歌声の表現がどのくらい自然で人間らしいかを1（非常に不自然）～5（非常に自然）で評価<br>
+            <br>
+            <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
+                <thead>
+                    <tr style="background: #f0f0f0;">
+                        <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">質問</th>
+                        <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">1</th>
+                        <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">2</th>
+                        <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">3</th>
+                        <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">4</th>
+                        <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">5</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;"><strong>質問1: 音質（技術的な品質）</strong><br>ノイズ、音割れの有無、明瞭さ</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">非常に悪い</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">悪い</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">普通</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">良い</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">非常に良い</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;"><strong>質問2: 歌声としての自然さ（表現の品質）</strong><br>歌声の表現がどのくらい自然で人間らしいか</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">非常に不自然</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">不自然</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">普通</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">自然</td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">非常に自然</td>
+                    </tr>
+                </tbody>
+            </table>
+            <br>
             3. 全ての音声の両方の質問に回答したら「次へ」ボタンで次の曲に進みます<br>
             4. 10曲全ての評価が終わったら完了です<br>
             <br>
@@ -735,7 +765,7 @@
 
                 const qualityLabel = document.createElement('div');
                 qualityLabel.className = 'rating-label-small';
-                qualityLabel.innerHTML = '<strong>質問1: 音質（技術的な品質）</strong><br>ノイズ、音割れの有無、明瞭さ';
+                qualityLabel.innerHTML = '<strong>質問1: 音質</strong>';
                 qualitySection.appendChild(qualityLabel);
 
                 const qualityButtons = document.createElement('div');
@@ -770,7 +800,7 @@
 
                 const naturalnessLabel = document.createElement('div');
                 naturalnessLabel.className = 'rating-label-small';
-                naturalnessLabel.innerHTML = '<strong>質問2: 歌声としての自然さ（表現の品質）</strong><br>歌声の表現がどのくらい自然で人間らしいか';
+                naturalnessLabel.innerHTML = '<strong>質問2: 歌声としての自然さ</strong>';
                 naturalnessSection.appendChild(naturalnessLabel);
 
                 const naturalnessButtons = document.createElement('div');
