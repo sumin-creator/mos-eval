@@ -466,13 +466,15 @@
 
         <div id="evaluationSection" style="display: none;">
             <div class="audio-grid" id="audioGrid"></div>
-        </div>
-
-            <div class="button-group">
-                <button class="btn-secondary" id="prevBtn" style="display: none;">前へ</button>
-                <button class="btn-primary" id="nextBtn" disabled>次へ</button>
-                <button class="btn-secondary" id="resetBtn" style="background: #dc3545; color: white;">進捗をリセット</button>
+            
+            <div class="button-group" style="flex-direction: column; gap: 10px; margin-top: 30px;">
+                <button class="btn-primary" id="nextBtn" disabled style="width: 100%;">次へ</button>
+                <div style="display: flex; gap: 10px; width: 100%;">
+                    <button class="btn-secondary" id="prevBtn" style="display: none; flex: 1;">前へ</button>
+                    <button class="btn-secondary" id="resetBtn" style="background: #dc3545; color: white; flex: 1;">進捗をリセット</button>
+                </div>
             </div>
+        </div>
 
         <div class="results-section" id="resultsSection">
             <h2>評価完了！ご協力ありがとうございました。</h2>
@@ -820,12 +822,7 @@
             if (currentSongIndex === 0) {
                 prevBtn.style.display = 'none'; // 最初のページでは非表示
             } else {
-                prevBtn.style.display = 'inline-block'; // 2ページ目以降は表示
-            }
-            
-            // 最後のページでは前へボタンを非表示
-            if (currentSongIndex >= shuffledSongs.length - 1) {
-                prevBtn.style.display = 'none';
+                prevBtn.style.display = 'block'; // 2ページ目以降は表示（最後のページも含む）
             }
         }
 
@@ -948,13 +945,16 @@
         // 前へボタン
         document.getElementById('prevBtn').addEventListener('click', () => {
             if (currentSongIndex > 0) {
-                // 現在の評価結果を削除（前のページに戻るため）
-                if (results.length > 0) {
-                    results.pop();
+                // 確認ダイアログを表示
+                if (confirm('前の曲に戻りますか？\n\n注意: 現在の曲の評価結果は削除され、前の曲の評価結果が表示されます。')) {
+                    // 現在の評価結果を削除（前のページに戻るため）
+                    if (results.length > 0) {
+                        results.pop();
+                    }
+                    currentSongIndex--;
+                    saveProgress();
+                    loadSong();
                 }
-                currentSongIndex--;
-                saveProgress();
-                loadSong();
             }
         });
 
