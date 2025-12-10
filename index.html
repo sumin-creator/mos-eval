@@ -931,6 +931,7 @@
         async function showResults() {
             document.getElementById('evaluationSection').style.display = 'none';
             document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('resetBtn').style.display = 'none'; // 評価完了時はリセットボタンを非表示
             document.getElementById('resultsSection').classList.add('show');
 
             // ローカルストレージに保存（JSON形式）
