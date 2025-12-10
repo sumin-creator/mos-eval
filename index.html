@@ -214,12 +214,18 @@
 
         <div class="current-sample" id="currentSample"></div>
 
-        <div class="audio-section" id="audioSection">
+        <div class="audio-section" id="audioSection" style="display: none;">
             <div class="audio-label" id="audioLabel">音声を読み込み中...</div>
-            <audio id="audioPlayer" controls preload="auto"></audio>
+            <audio id="audioPlayer" controls preload="none"></audio>
         </div>
 
-        <div class="rating-section">
+        <div class="button-group" id="startSection">
+            <button class="btn-primary" id="startBtn" style="font-size: 1.3em; padding: 20px 40px;">
+                ▶ 評価を開始
+            </button>
+        </div>
+
+        <div class="rating-section" id="ratingSection" style="display: none;">
             <div class="rating-label">音質を評価してください（1: 悪い ～ 5: 優秀）</div>
             <div class="rating-buttons">
                 <button class="rating-btn" data-rating="1">1</button>
@@ -235,7 +241,7 @@
             </div>
         </div>
 
-        <div class="button-group">
+        <div class="button-group" id="mainButtons" style="display: none;">
             <button class="btn-primary" id="nextBtn" disabled>次へ</button>
             <button class="btn-secondary" id="downloadBtn" style="display: none;">結果をダウンロード</button>
             <button class="btn-secondary" id="resetBtn" style="background: #dc3545; color: white;">進捗をリセット</button>
@@ -489,7 +495,27 @@
 
         // 初期化
         loadProgress();
-        loadAudio();
+        
+        // Edge対応: ユーザー操作後に音声を読み込む
+        document.getElementById('startBtn').addEventListener('click', () => {
+            // 開始ボタンを非表示
+            document.getElementById('startSection').style.display = 'none';
+            // 評価セクションとボタンを表示
+            document.getElementById('audioSection').style.display = 'block';
+            document.getElementById('ratingSection').style.display = 'block';
+            document.getElementById('mainButtons').style.display = 'flex';
+            // ユーザー操作後に音声を読み込む
+            loadAudio();
+        });
+        
+        // 既に評価を開始している場合は自動で開始
+        if (currentIndex > 0 && shuffledAudios.length > 0) {
+            document.getElementById('startSection').style.display = 'none';
+            document.getElementById('audioSection').style.display = 'block';
+            document.getElementById('ratingSection').style.display = 'block';
+            document.getElementById('mainButtons').style.display = 'flex';
+            loadAudio();
+        }
     </script>
 </body>
 </html>
