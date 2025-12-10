@@ -12,6 +12,8 @@ Thumbs.db
 # Logs
 *.log
 
-# 音声ファイルは含める（必要に応じてコメントアウト）
-# zeval/
+# 音声ファイルはGitHubのWebインターフェースからは非表示
+# ただし、GitHub Pagesからは index.html 経由でアクセス可能
+zeval/
+*.wav
 
